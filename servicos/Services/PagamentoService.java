@@ -6,6 +6,8 @@ import com.SoulCode.servicos.Models.StatusPagamento;
 import com.SoulCode.servicos.Repositories.ChamadoRepository;
 import com.SoulCode.servicos.Repositories.PagamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,15 +22,18 @@ public class PagamentoService {
     @Autowired
     ChamadoRepository chamadoRepository;
 
+    @Cacheable("cachePagamento")
     public List<Pagamento> buscarTodosOsPagamentos() {
         return pagamentoRepository.findAll();
     }
 
-    public Pagamento buscarPagamentoPeloId(Integer idPagamento) {
-        Optional<Pagamento> pagamento = pagamentoRepository.findById(idPagamento);
+    @Cacheable(value = "cachePagamento", key = "#idPagament")
+    public Pagamento buscarPagamentoPeloId(Integer idPagament) {
+        Optional<Pagamento> pagamento = pagamentoRepository.findById(idPagament);
         return pagamento.orElseThrow();
     }
 
+    @CachePut(value = "cachePagamento", key = "#idChamado")
     public Pagamento cadastrarPagamento(Pagamento pagamento, Integer idChamado) {
         Optional<Chamado> chamado = chamadoRepository.findById(idChamado);
         if (chamado.isPresent()) {
@@ -47,12 +52,14 @@ public class PagamentoService {
         }
     }
 
+    @CachePut(value = "cachePagamento", key = "#pagamento.idPagament")
     public Pagamento editarPagamento(Pagamento pagamento) {
         return pagamentoRepository.save(pagamento);
     }
 
-    public Pagamento editarStatusPagamento(Integer idPagamento, String status) {
-        Pagamento pagamento = buscarPagamentoPeloId(idPagamento);
+    @CachePut(value = "cachePagamento", key = "#idPagament")
+    public Pagamento editarStatusPagamento(Integer idPagament, String status) {
+        Pagamento pagamento = buscarPagamentoPeloId(idPagament);
 
         switch (status){
             case "QUITADO":
@@ -65,14 +72,15 @@ public class PagamentoService {
         return pagamentoRepository.save(pagamento);
     }
 
+    @Cacheable(value = "cachePagamento", key = "#status")
     public List<Pagamento> buscarPagamentoPeloStatus(String status) {
         List<Pagamento> pagamento = pagamentoRepository.findPagamentoByStatus(status);
 
         return pagamento;
     }
 
+    @Cacheable("cachePagamentos")
     public List<List> buscarChamadoClientePagamento() {
         return pagamentoRepository.findByPagamentoChamadoCliente();
     }
-
 }

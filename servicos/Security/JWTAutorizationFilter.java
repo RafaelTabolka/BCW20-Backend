@@ -22,6 +22,13 @@ public class JWTAutorizationFilter extends BasicAuthenticationFilter {
         this.jwtUtils = jwtUtils;
     }
 
+    public UsernamePasswordAuthenticationToken getAuthentication(String token) {
+        String login = jwtUtils.getLogin(token); // pega o token e extai o login do subject
+        if(login == null) {
+            return null;
+        }
+        return new UsernamePasswordAuthenticationToken(login, null, new ArrayList<>());
+    }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String token = request.getHeader("Authorization"); // Bearer dados2313123
@@ -38,13 +45,5 @@ public class JWTAutorizationFilter extends BasicAuthenticationFilter {
         }
 
         chain.doFilter(request, response);
-    }
-
-    public UsernamePasswordAuthenticationToken getAuthentication(String token) {
-        String login = jwtUtils.getLogin(token); // pega o token e extai o login do subject
-        if(login == null) {
-            return null;
-        }
-        return new UsernamePasswordAuthenticationToken(login, null, new ArrayList<>());
     }
 }

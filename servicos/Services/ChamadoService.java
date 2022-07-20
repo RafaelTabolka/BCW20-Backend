@@ -7,6 +7,9 @@ import com.SoulCode.servicos.Repositories.ClienteRepository;
 import com.SoulCode.servicos.Repositories.FuncionarioRepository;
 import com.SoulCode.servicos.Repositories.PagamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
@@ -29,29 +32,35 @@ public class ChamadoService {
     @Autowired
     PagamentoRepository pagamentoRepository;
 
+    @Cacheable("cacheChamado")
     public List<Chamado> mostrarTodosOsChamadosService() {
         return chamadoRepository.findAll();
     }
 
-    public Chamado mostrarChamadoPeloIdService(Integer id) {
-        Optional<Chamado> chamado = chamadoRepository.findById(id);
+    @Cacheable(value = "cacheChamado", key = "#idChamado")
+    public Chamado mostrarChamadoPeloIdService(Integer idChamado) {
+        Optional<Chamado> chamado = chamadoRepository.findById(idChamado);
         return chamado.orElseThrow();
     }
 
-    public List<Chamado> buscarChamadosPeloClienteService(Integer idCliente) {
-        Optional<Cliente> cliente = clienteRepository.findById(idCliente);
+    @Cacheable(value = "cacheChamado", key = "#id")
+    public List<Chamado> buscarChamadosPeloClienteService(Integer id) {
+        Optional<Cliente> cliente = clienteRepository.findById(id);
         return chamadoRepository.findByCliente(cliente);
     }
 
+    @Cacheable(value = "cacheChamado", key = "#idFuncionario")
     public List<Chamado> buscarChamadosPeloIdDoFuncionarioService(Integer idFuncionario) {
         Optional<Funcionario> funcionario = funcionarioRepository.findById(idFuncionario);
         return chamadoRepository.findByFuncionario(funcionario);
     }
 
+    @Cacheable(value = "cacheChamado", key = "#status")
     public List<Chamado> buscarChamadosPeloStatusService(String status) {
         return chamadoRepository.findByStatus(status);
     }
 
+    @Cacheable("cacheChamadoData")
     public List<Chamado> buscarIntervaloDeDataService(Date data1, Date data2) {
         return chamadoRepository.finndByIntervaloData(data1, data2);
     }
@@ -62,27 +71,30 @@ public class ChamadoService {
     // 2º No momento do cadastro do chamado, a princípio vamos fazer esse cadastro sem estar atribuído a um funcionário.
     // 3º No momento do cadastro do chamado, o status do mesmo deve ser RECEBIDO
 
-    public Chamado cadastrarChamadoService(Chamado chamado, Integer idCliente) {
+    @CachePut(value = "cacheChamado", key = "#id")
+    public Chamado cadastrarChamadoService(Chamado chamado, Integer id) {
         chamado.setStatus(StatusChamado.RECEBIDO);// Regra 3 - atribuição do status recebido para o chamado que está sendo cadastrado
         chamado.setFuncionario(null); // Regra 2 - dizer que ainda não atribuímos esse chamado para nenhum funcionário
-        Optional<Cliente> cliente = clienteRepository.findById(idCliente); // Regra 1 - buscando os dados do cliente dono do chamado
+        Optional<Cliente> cliente = clienteRepository.findById(id); // Regra 1 - buscando os dados do cliente dono do chamado
         chamado.setCliente(cliente.get());
         return chamadoRepository.save(chamado);
     }
 
     // Método para exclusão de um chamado
 
-    public void excluirChamadoService(Integer idChamado) {
-        chamadoRepository.deleteById(idChamado);
+    @CacheEvict(value = "cacheChamado", key = "id", allEntries = true)
+    public void excluirChamadoService(Integer id) {
+        chamadoRepository.deleteById(id);
     }
 
     // Método para editar um chamado
     // No momento da edição de um chamado, devemos preservar o cliente e o funcionário desse chamado.
     // Vamos editar os dados do chamado, mas continuamos com os dados do cliente e os dados do funcionário.
 
-    public Chamado editarChamadoService(Chamado chamado, Integer idChamado) {
+    @CachePut(value = "cacheChamado", key = "#id")
+    public Chamado editarChamadoService(Chamado chamado, Integer id) {
         // Instanciamos aqui um objeto do tipo Chamado para guardar os dados do chamado sem as novas alterações.
-        Chamado chamadoSemAsNovasAlteracoes = mostrarChamadoPeloIdService(idChamado);
+        Chamado chamadoSemAsNovasAlteracoes = mostrarChamadoPeloIdService(id);
         Funcionario funcionario = chamadoSemAsNovasAlteracoes.getFuncionario();
         Cliente cliente = chamadoSemAsNovasAlteracoes.getCliente();
 
@@ -97,6 +109,7 @@ public class ChamadoService {
     // Regra: no momento em que um determinado chamado é atribuido a um funcionario,
     // o status do chamado precisa ser alterado para ATRIBUIDO
 
+    @CachePut(value = "cacheChamado", key = "idFuncionario")
     public Chamado atribuirFuncionarioService(Integer idChamado, Integer idFuncionario) {
         // Buscar os dados do funcionario que vai ser atribuído a esse chamado.
         Optional<Funcionario> funcionario = funcionarioRepository.findById(idFuncionario);
@@ -111,8 +124,9 @@ public class ChamadoService {
 
     // Método para modificar o status de um chamado.
 
-    public Chamado modificarStatusService(Integer idChamado, String status) {
-        Chamado chamado = mostrarChamadoPeloIdService(idChamado);
+    @CachePut(value = "cacheChamado", key = "#id")
+    public Chamado modificarStatusService(Integer id, String status) {
+        Chamado chamado = mostrarChamadoPeloIdService(id);
 
         if (chamado.getFuncionario() != null) {
             switch (status) {

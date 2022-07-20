@@ -38,12 +38,14 @@ public class ClienteService {
         );
     }
 
+    @Cacheable(value = "clientesCache", key = "#email")
     public Cliente mostrarClientePeloEmailService(String email) {
         Optional<Cliente> clientes = clienteRepository.findByEmail(email);
         return clientes.orElseThrow();
     }
 
     // Modificado para receber o idEndereco como segundo argumento passado na Url, cadastrando o cliente já com o endereço
+    @CachePut(value = "clientesCache", key = "#cadastroCliente.id")
     public Cliente cadastrarClienteService(Cliente cadastroCliente) {
         cadastroCliente.setId(null);
        return clienteRepository.save(cadastroCliente);
@@ -54,10 +56,10 @@ public class ClienteService {
         clienteRepository.deleteById(idCliente);
     }
 
-    @CachePut(value = "clientesCache", key = "#cliente.idCliente")
+    @CachePut(value = "clientesCache", key = "#cliente.id")
     public Cliente editarClienteService(Cliente cliente) {
         mostrarClientePeloIdService(cliente.getId());
-        return clienteRepository.save(cliente);
+        return clienteRepository.save(cliente);// faz o cache desse retorno
     }
 }
 

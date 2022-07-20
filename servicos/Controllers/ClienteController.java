@@ -27,7 +27,8 @@ public class ClienteController {
 
     @GetMapping("/mostrarTodos")
     public List<Cliente> mostrarTodosOsClientes(){
-        List<Cliente> clientes = clienteService.mostrarTodosOsClientesService();
+        List<Cliente> clientes = clienteService.mostrarTodosOsClientesService(); // é aqui que ocorre a pergunta para o redis se existe os valores em cahce ou não
+        // caso não tenha os valores em cache, será requisitado ao banco, o banco passa para o spring, o spring passa para o redis e o redis passa para o spring e o spring para o usuário
         return clientes;
     }
 

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@EnableCaching
+@EnableCaching // essa anotação diz que a aplicação agora pode ser usado o cache
 @SpringBootApplication
 public class ServicosApplication {
 

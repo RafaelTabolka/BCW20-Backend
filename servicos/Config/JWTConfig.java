@@ -56,9 +56,9 @@ public class JWTConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean // cross origin resource sharing
-    CorsConfigurationSource corsConfigurationSource() {
+    CorsConfigurationSource corsConfigurationSource() { // disponibiliza uma configuração global para não haver erro de CORS
         CorsConfiguration configuration = new CorsConfiguration(); // configurações padrões
-        configuration.setAllowedMethods(List.of(
+        configuration.setAllowedMethods(List.of( // quais métodos do http estão liberados via CORS
                 HttpMethod.GET.name(),
                 HttpMethod.PUT.name(),
                 HttpMethod.POST.name(),
@@ -68,6 +68,8 @@ public class JWTConfig extends WebSecurityConfigurerAdapter {
         // endpoints permitidos para o front acessar
         source.registerCorsConfiguration("/**", configuration.applyPermitDefaultValues());
         return source;
+
+        //  "/servicos/funcionarios" -> "/**" asterísco é considerado qualquer endpoint, todos os endpoints são liberados para os métodos acima
     }
 
     @Bean

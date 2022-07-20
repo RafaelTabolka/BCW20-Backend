@@ -20,7 +20,9 @@ public class UploadFileController {
 
 
     @PostMapping("/funcionarios/envioFotos/{idFuncionario}")
-    public ResponseEntity<Void> enviarFoto(@PathVariable Integer idFuncionario, MultipartFile file, @RequestParam("nome") String nome) throws IOException {
+    public ResponseEntity<Void> enviarFoto(@PathVariable Integer idFuncionario,
+                                           MultipartFile file,
+                                           @RequestParam("nome") String nome) throws IOException {
 
 
         String fileNme = nome;

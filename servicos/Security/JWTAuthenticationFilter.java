@@ -1,9 +1,11 @@
 package com.SoulCode.servicos.Security;
 
 
+import com.SoulCode.servicos.Controllers.Exceptions.ResourceExceptionHandler;
 import com.SoulCode.servicos.Models.User;
 import com.SoulCode.servicos.Util.JWTUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -84,8 +86,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             "\"message\": \"Email/senha inválida\"," +
             "\"path\":\"/login\"" +
             "}";
-
-
     }
 }
 /**
