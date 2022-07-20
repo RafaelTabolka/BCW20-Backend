@@ -4,6 +4,7 @@ import com.SoulCode.servicos.Models.User;
 import com.SoulCode.servicos.Repositories.UserRepository;
 import com.SoulCode.servicos.Security.AuthUserDetail;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,7 +19,7 @@ public class AuthUserDetailService implements UserDetailsService {
     @Autowired
     UserRepository userRepository;
 
-    @Cacheable(value = "authCache", key = "#login")
+    @CachePut(value = "authCache", key = "#login")
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
         Optional<User> user =  userRepository.findByLogin(login);

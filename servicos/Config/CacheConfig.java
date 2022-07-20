@@ -35,8 +35,11 @@ public class CacheConfig {
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(10))
                                 .serializeValuesWith(serializationPair))
                 .withCacheConfiguration("cacheUser",
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(5)).serializeValuesWith(serializationPair))
-                .withCacheConfiguration("authCache", RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(60)).serializeValuesWith(serializationPair));
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(5))
+                                .serializeValuesWith(serializationPair))
+                .withCacheConfiguration("authCache",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(60))
+                                .serializeValuesWith(serializationPair));
     }
 }
 
